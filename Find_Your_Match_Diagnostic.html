@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Find Your Match | Story Learning &amp; Development</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100vh;background:#EAF4FB;font-family:'Barlow',system-ui,sans-serif;color:#333}
+body.text-lg{font-size:118%}
+body.text-lg .q-text{font-size:34px}
+body.text-lg .opt,body.text-lg .subtitle,body.text-lg p,body.text-lg li{font-size:18px}
+button{font-family:inherit}
+:focus-visible{outline:3px solid #009FA0;outline-offset:2px}
+
+.header{display:flex;align-items:center;justify-content:space-between;padding:14px 32px;gap:12px;flex-wrap:wrap}
+.header-left{display:flex;align-items:center;gap:16px}
+.divider{width:1px;height:28px;background:#c8d8e8}
+.tag{font-size:12px;font-weight:600;color:#8fa0b0;letter-spacing:.2em;text-transform:uppercase}
+.logo svg{height:36px;width:auto;display:block}
+.header-right{display:flex;gap:10px}
+.pill-btn{display:inline-flex;align-items:center;gap:8px;background:white;color:#0061AD;border:1.5px solid #d1e3f3;border-radius:20px;padding:8px 16px;font-weight:600;font-size:13px;cursor:pointer;transition:all .2s ease}
+.pill-btn:hover{background:#f0f7fd;border-color:#0061AD}
+.pill-btn.active{background:#0061AD;color:white;border-color:#0061AD}
+
+.container{max-width:880px;margin:0 auto;padding:8px 32px 64px}
+.title-block{text-align:center;margin:24px auto 8px;max-width:720px}
+.title{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:46px;font-weight:800;color:#004B86;letter-spacing:-.02em;line-height:1.08}
+.subtitle{color:#5d6b78;font-size:16px;line-height:1.7;margin-top:14px}
+
+.progress-wrap{max-width:720px;margin:20px auto 28px;display:flex;align-items:center;gap:16px}
+.progress-bar{flex:1;height:6px;background:#dce8f3;border-radius:6px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,#0061AD,#009FA0);border-radius:6px;transition:width .35s cubic-bezier(.4,0,.2,1)}
+.progress-text{font-size:12px;color:#7d8e9e;font-weight:600;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+
+.still .card,.still .res-hero,.still .res-card{animation:none}
+.card{background:white;border-radius:28px;padding:40px 36px;box-shadow:0 6px 24px rgba(0,97,173,.07);animation:fadeIn .35s ease both}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.q-section{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;color:#009FA0;letter-spacing:.22em;text-transform:uppercase;margin-bottom:10px}
+.q-text{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:30px;font-weight:800;color:#1A3A5C;line-height:1.2;margin-bottom:12px}
+.q-hint{color:#6b7c8c;font-size:15px;line-height:1.6;margin-bottom:22px}
+.scenario{background:#f3f8fc;border-left:5px solid #0061AD;border-radius:0 16px 16px 0;padding:18px 22px;margin-bottom:22px;color:#2a3a4a;font-size:16px;line-height:1.65}
+.field-label{font-weight:700;color:#1A3A5C;font-size:15px;margin:22px 0 10px}
+.field-label:first-child{margin-top:0}
+
+.opts{display:flex;flex-direction:column;gap:10px}
+.opts.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+.opt{display:flex;align-items:center;gap:14px;background:#f6fafd;border:2px solid #e3edf6;border-radius:16px;padding:15px 20px;cursor:pointer;transition:all .18s ease;text-align:left;font-size:15.5px;color:#2a3a4a;font-weight:500;width:100%;line-height:1.45}
+.opt:hover{border-color:#9bc6e6;background:#eef6fc}
+.opt[aria-pressed="true"]{border-color:#0061AD;background:#e8f2fb;color:#004B86;font-weight:600}
+.dot{width:18px;height:18px;border-radius:50%;border:2px solid #b8cbdc;flex-shrink:0;position:relative}
+.opt[aria-pressed="true"] .dot{border-color:#0061AD;background:#0061AD}
+.opt[aria-pressed="true"] .dot::after{content:'';position:absolute;inset:3px;border-radius:50%;background:white}
+.check{width:20px;height:20px;border-radius:6px;border:2px solid #b8cbdc;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:white;font-size:13px;font-weight:800}
+.opt[aria-pressed="true"] .check{border-color:#0061AD;background:#0061AD}
+.rank{width:28px;height:28px;border-radius:50%;background:#e3edf6;color:#8fa0b0;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:800;font-family:'Barlow Condensed',sans-serif;font-size:16px}
+.opt[aria-pressed="true"] .rank{background:#0061AD;color:white}
+.opt small{display:block;font-weight:400;color:#6b7c8c;font-size:13.5px;margin-top:2px}
+
+.exp-row{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;padding:14px 0;border-bottom:1px solid #e8eff6}
+.exp-row:last-child{border-bottom:none}
+.exp-name{font-weight:700;color:#1A3A5C;font-size:15.5px}
+.exp-eg{color:#6b7c8c;font-size:13.5px;margin-top:2px;line-height:1.45}
+.seg{display:flex;background:#f0f5fa;border-radius:12px;padding:3px;gap:2px}
+.seg button{border:none;background:transparent;padding:8px 11px;border-radius:9px;font-size:13px;font-weight:600;color:#5d6b78;cursor:pointer;white-space:nowrap}
+.seg button[aria-pressed="true"]{background:#0061AD;color:white}
+.seg button:hover:not([aria-pressed="true"]){background:#e1ecf6}
+
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:28px;gap:12px}
+.nav-btn{display:inline-flex;align-items:center;gap:8px;background:white;color:#0061AD;border:1.5px solid #d1e3f3;border-radius:24px;padding:12px 24px;font-weight:600;font-size:15px;cursor:pointer}
+.nav-btn:hover:not(:disabled){background:#f0f7fd}
+.nav-btn.primary{background:#0061AD;color:white;border-color:#0061AD;box-shadow:0 6px 20px rgba(0,97,173,.22)}
+.nav-btn.primary:hover:not(:disabled){background:#004B86}
+.nav-btn:disabled{opacity:.4;cursor:not-allowed}
+.nav-note{font-size:13px;color:#8fa0b0}
+
+.path-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:28px}
+.path-card{background:white;border:2px solid #e3edf6;border-radius:24px;padding:30px 26px;text-align:left;cursor:pointer;transition:all .2s ease;box-shadow:0 6px 24px rgba(0,97,173,.06)}
+.path-card:hover{border-color:#0061AD;transform:translateY(-3px)}
+.path-card h2{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800;color:#004B86;margin:14px 0 8px}
+.path-card p{color:#5d6b78;font-size:15px;line-height:1.6}
+.path-icon{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center}
+.path-icon svg{width:28px;height:28px}
+.how{background:white;border-radius:24px;padding:24px 28px;margin-top:22px;color:#4a5866;font-size:15px;line-height:1.7}
+.how h3{font-family:'Barlow Condensed',sans-serif;font-size:20px;color:#1A3A5C;margin-bottom:6px}
+.how ol{padding-left:20px}
+
+/* Results */
+.res-hero{background:linear-gradient(135deg,#0061AD,#004B86);color:white;border-radius:28px;padding:34px 36px;margin-bottom:20px}
+.res-hero .eyebrow{font-size:12px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;opacity:.8}
+.res-hero h2{font-family:'Barlow Condensed',sans-serif;font-size:40px;font-weight:800;line-height:1.1;margin:8px 0 10px}
+.res-hero p{opacity:.92;line-height:1.65;font-size:16px}
+.res-card{background:white;border-radius:24px;padding:28px 30px;margin-bottom:18px;box-shadow:0 6px 24px rgba(0,97,173,.06)}
+.res-card h3{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:800;color:#1A3A5C;margin-bottom:6px}
+.res-card > p{color:#5d6b78;line-height:1.65;font-size:15px}
+.spectrum{margin:20px 0 6px}
+.spec-labels{display:flex;justify-content:space-between;font-weight:700;font-size:14px;color:#1A3A5C;margin-bottom:8px}
+.spec-track{position:relative;height:10px;border-radius:10px;background:linear-gradient(90deg,#cfe3f3,#e8eef3 50%,#cdeeee)}
+.spec-marker{position:absolute;top:50%;width:24px;height:24px;border-radius:50%;background:#0061AD;border:4px solid white;box-shadow:0 2px 8px rgba(0,0,0,.2);transform:translate(-50%,-50%)}
+.spec-desc{font-size:14px;color:#5d6b78;margin-top:10px;line-height:1.55}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.chip{background:#eef6fc;color:#004B86;border-radius:20px;padding:6px 14px;font-size:14px;font-weight:600}
+.chip.teal{background:#e2f5f5;color:#00706f}
+.code-box{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:#f3f8fc;border:2px dashed #9bc6e6;border-radius:18px;padding:18px 20px;margin-top:14px}
+.code{font-family:Consolas,'Courier New',monospace;font-size:22px;font-weight:700;color:#004B86;letter-spacing:.06em;flex:1;min-width:260px;word-break:break-all}
+.note{background:#fff8e8;border-left:5px solid #e8a00e;border-radius:0 14px 14px 0;padding:14px 18px;margin-top:16px;font-size:14.5px;color:#5a4a20;line-height:1.6}
+.route-switch{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.steps li{margin:6px 0;line-height:1.6;color:#4a5866}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:#1A3A5C;color:white;padding:12px 22px;border-radius:24px;font-weight:600;opacity:0;transition:all .25s ease;pointer-events:none;z-index:50}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+@media (max-width:640px){
+  .header{padding:12px 16px}.container{padding:8px 16px 48px}
+  .card{padding:26px 20px;border-radius:22px}.title{font-size:36px}.q-text{font-size:25px}
+  .path-grid{grid-template-columns:1fr}.exp-row{grid-template-columns:1fr}
+  .seg{overflow-x:auto}.res-hero{padding:26px 22px}.res-hero h2{font-size:32px}.res-card{padding:22px 20px}
+  .code{font-size:18px;min-width:0}
+}
+@media print{
+  .header-right,.nav,.no-print,.progress-wrap{display:none!important}
+  html,body{background:white}.res-card,.res-hero{box-shadow:none;break-inside:avoid}
+  .res-hero{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-left">
+    <div class="logo" id="logo" aria-label="Story"></div>
+    <div class="divider"></div>
+    <div class="tag">Mentoring &amp; Coaching</div>
+  </div>
+  <div class="header-right">
+    <button class="pill-btn" id="text-btn" onclick="toggleText()" aria-pressed="false">Larger text</button>
+    <button class="pill-btn" id="restart-btn" onclick="restart()" style="display:none">Start again</button>
+  </div>
+</div>
+<main class="container" id="app" aria-live="polite"></main>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const STORY_LOGO_SVG = '<svg viewBox="0 0 2081 472" xmlns="http://www.w3.org/2000/svg"><path fill="#0061AD" d="M1392,473C928,473,464.6,473,1.1,473C1.1,315.7,1.1,158.5,1.1,1.1C694.7,1.1,1388.3,1.1,2082,1.1C2082,158.4,2082,315.7,2082,473C1852.1,473,1622.3,473,1392,473M1552.1,236.6C1558.3,230.1,1565.3,224.2,1570.5,217C1587.8,192.6,1593.4,164.9,1588.7,135.6C1585,112.6,1574.7,92.8,1555.2,78.8C1537.1,65.8,1516.2,62.3,1494.8,62.2C1430.1,61.9,1365.4,62.1,1300.8,62.1C1299,62.1,1297.2,62.1,1295.6,62.1C1271,177.8,1246.7,292.7,1222.2,408C1257.2,408,1291.8,408,1326.5,407.9C1327.6,407.9,1329.5,406,1329.8,404.8C1332.7,392,1335.3,379.2,1338,366.4C1344.7,334.3,1351.3,302.2,1358.2,270.2C1358.4,269,1360.2,267.3,1361.3,267.2C1374.9,266.4,1386.8,269.8,1394.3,282.2C1398.8,289.6,1403.4,297,1406.8,304.8C1420.9,337.5,1434.6,370.4,1448.2,403.2C1449.7,406.7,1451.2,408.1,1455.3,408.1C1489.5,407.9,1523.6,408,1557.8,408C1559.4,408,1561,408,1563.4,408C1555.7,389.3,1548.5,371.1,1540.8,353.3C1529.2,326.6,1516.8,300.3,1498.9,277.2C1495,272.1,1490.5,267.6,1486.1,262.5C1510,258.5,1532.4,252,1552.1,236.6M1064.4,404.9C1103,392.3,1134.2,369.2,1158.9,337.3C1180.5,309.4,1193.6,277.7,1200.1,243C1206.2,210.3,1206,177.8,1194.8,146.2C1179.7,103.6,1151,74.7,1106.8,62.9C1073.5,54.1,1039.6,54.6,1005.8,59.9C960.6,67,923.1,88.7,894.3,123.8C850.5,177.1,833.9,238.8,845.4,306.8C852.4,348.4,876,378.9,914.6,397.1C945.4,411.6,978.2,415,1011.7,413.6C1029.3,412.8,1046.7,410.6,1064.4,404.9M373.3,145.4C374.8,151.2,376.4,157.1,378,163.4C410.7,161.7,443.8,159.9,477.3,158.1C476.4,152.6,475.8,148,474.9,143.5C470.7,122.5,461.7,103.9,445.4,89.4C427.4,73.4,405.6,65.5,382.3,61.1C358.7,56.5,334.8,55.7,310.8,57C286.9,58.4,263.9,63.4,242.4,74.3C200.5,95.6,179.7,138,189.1,183.4C193.8,206.7,208.6,222.5,227.9,234.8C251,249.4,276.6,258.6,302.1,268C315.5,272.9,329.2,277.1,340.8,285.7C347.1,290.4,351.9,296.2,353,304.3C354.9,317.9,348,330.6,334.8,337.9C320.9,345.6,305.9,346.3,290.7,344.9C268.5,342.7,254.3,330.2,249.5,308.6C247.9,301.6,247.7,294.2,246.8,286.6C213.7,288.8,180.6,291,146.2,293.3C147.2,303.9,147.2,314.2,149.2,324.2C154.7,351.6,168.1,374.4,191.7,390.2C215.1,405.8,241.9,410.5,269.1,412.8C293.2,414.9,317.3,414.3,341.3,411.1C371,407.1,397.5,396.4,419.1,375.5C450.7,345,461.4,308.4,448.8,266C442,242.9,425.6,227,405.9,214.2C382.8,199.3,357.1,190,331.7,179.9C319.9,175.2,308.3,169.6,297.4,163.2C289.3,158.5,285.1,150.7,287.9,140.7C290.5,131.2,297.1,125.5,305.8,122C315.1,118.4,324.9,118.1,334.7,119C352.2,120.5,365.8,127.8,373.3,145.4M1696.5,408C1722.3,408,1748.2,408,1774,408.1C1777.1,408.1,1778.5,407.5,1779.2,403.9C1786.3,369.2,1793.5,334.6,1801.2,300C1803.4,289.6,1803.3,278.3,1811.6,270C1813.5,268.1,1815,265.8,1816.6,263.7C1864.7,201.5,1912.9,139.3,1961,77.1C1964.7,72.4,1968.3,67.5,1972.1,62.5C1971.2,62.2,1970.9,62.1,1970.6,62.1C1931.4,62.1,1892.3,62,1853.1,62.2C1851.4,62.2,1849.1,63.6,1848,65.1C1824.1,99.1,1800.4,133.1,1776.6,167.2C1771.4,174.7,1766.1,182.2,1760.5,190.1C1759.4,187.7,1758.6,186,1757.9,184.4C1741.6,144.9,1725.2,105.5,1709,66.1C1707.7,62.9,1706.1,62,1702.8,62C1668.3,62.1,1633.8,62.1,1599.3,62.1C1598.2,62.1,1597.1,62.2,1595.7,62.3C1596.2,63.6,1596.5,64.5,1596.9,65.4C1609.5,91.2,1622.2,117.1,1634.8,143C1655.6,185.5,1676.4,228.1,1697.1,270.7C1698.1,272.8,1699,275.5,1698.5,277.7C1690.9,313.8,1683.1,349.9,1675.3,386C1673.8,393.2,1672.4,400.4,1670.9,408C1679.5,408,1687.5,408,1696.5,408M829.5,62.1C810,62.1,790.5,62.1,771,62.1C693.4,62.1,615.7,62.1,538.1,62C534.5,62,532.6,62.3,531.8,66.7C529,81.8,525.5,96.8,522.3,111.9C519.9,123.5,517.5,135.1,515.1,147.1C551,147.1,586.4,147.1,622.3,147.1C612.9,191,603.4,234.3,594.1,277.7C584.8,321,575.6,364.3,566.3,408C601.3,408,636,408,670.6,407.8C671.8,407.8,673.6,405.7,673.9,404.3C681.3,371.2,688.6,338,695.7,304.9C704.9,262.7,713.9,220.4,723,178.2C725.2,167.8,727.6,157.5,730,147C767.4,147,804.5,147,842,147C848,118.6,853.9,90.5,859.9,62.1C849.8,62.1,840.2,62.1,829.5,62.1z"/><path fill="#FEFFFF" d="M1551.8,236.8C1532.4,252,1510,258.5,1486.1,262.5C1490.5,267.6,1495,272.1,1498.9,277.2C1516.8,300.3,1529.2,326.6,1540.8,353.3C1548.5,371.1,1555.7,389.3,1563.4,408C1561,408,1559.4,408,1557.8,408C1523.6,408,1489.5,407.9,1455.3,408.1C1451.2,408.1,1449.7,406.7,1448.2,403.2C1434.6,370.4,1420.9,337.5,1406.8,304.8C1403.4,297,1398.8,289.6,1394.3,282.2C1386.8,269.8,1374.9,266.4,1361.3,267.2C1360.2,267.3,1358.4,269,1358.2,270.2C1351.3,302.2,1344.7,334.3,1338,366.4C1335.3,379.2,1332.7,392,1329.8,404.8C1329.5,406,1327.6,407.9,1326.5,407.9C1291.8,408,1257.2,408,1222.2,408C1246.7,292.7,1271,177.8,1295.6,62.1C1297.2,62.1,1299,62.1,1300.8,62.1C1365.4,62.1,1430.1,61.9,1494.8,62.2C1516.2,62.3,1537.1,65.8,1555.2,78.8C1574.7,92.8,1585,112.6,1588.7,135.6C1593.4,164.9,1587.8,192.6,1570.5,217C1565.3,224.2,1558.3,230.1,1551.8,236.8M1402.5,202.9C1417.4,202.2,1432.4,202.2,1447.3,200.8C1461.3,199.5,1473.4,193.2,1481.9,181.6C1493.4,165.6,1493.9,136.1,1463,133.4C1438.2,131.3,1413.1,132,1387.9,131.5C1382.8,155.6,1377.8,179,1372.7,202.9C1382.6,202.9,1392.1,202.9,1402.5,202.9z"/><path fill="#FEFFFF" d="M1064,405C1046.7,410.6,1029.3,412.8,1011.7,413.6C978.2,415,945.4,411.6,914.6,397.1C876,378.9,852.4,348.4,845.4,306.8C833.9,238.8,850.5,177.1,894.3,123.8C923.1,88.7,960.6,67,1005.8,59.9C1039.6,54.6,1073.5,54.1,1106.8,62.9C1151,74.7,1179.7,103.6,1194.8,146.2C1206,177.8,1206.2,210.3,1200.1,243C1193.6,277.7,1180.5,309.4,1158.9,337.3C1134.2,369.2,1103,392.3,1064,405M978.7,330C1007.1,341.4,1038.2,334,1058.6,311.4C1075.1,293.2,1084.6,271.5,1091,248.3C1096.6,227.8,1101.2,207.1,1098.1,185.5C1093.8,155.3,1071,135.2,1040.5,135C1014,134.8,993.9,146.9,979.2,167.9C956.5,200.4,947.1,237.3,946.8,276.3C946.6,299.5,956.3,318.5,978.7,330z"/><path fill="#FEFEFF" d="M373.2,145C365.8,127.8,352.2,120.5,334.7,119C324.9,118.1,315.1,118.4,305.8,122C297.1,125.5,290.5,131.2,287.9,140.7C285.1,150.7,289.3,158.5,297.4,163.2C308.3,169.6,319.9,175.2,331.7,179.9C357.1,190,382.8,199.3,405.9,214.2C425.6,227,442,242.9,448.8,266C461.4,308.4,450.7,345,419.1,375.5C397.5,396.4,371,407.1,341.3,411.1C317.3,414.3,293.2,414.9,269.1,412.8C241.9,410.5,215.1,405.8,191.7,390.2C168.1,374.4,154.7,351.6,149.2,324.2C147.2,314.2,147.2,303.9,146.2,293.3C180.6,291,213.7,288.8,246.8,286.6C247.7,294.2,247.9,301.6,249.5,308.6C254.3,330.2,268.5,342.7,290.7,344.9C305.9,346.3,320.9,345.6,334.8,337.9C348,330.6,354.9,317.9,353,304.3C351.9,296.2,347.1,290.4,340.8,285.7C329.2,277.1,315.5,272.9,302.1,268C276.6,258.6,251,249.4,227.9,234.8C208.6,222.5,193.8,206.7,189.1,183.4C179.7,138,200.5,95.6,242.4,74.3C263.9,63.4,286.9,58.4,310.8,57C334.8,55.7,358.7,56.5,382.3,61.1C405.6,65.5,427.4,73.4,445.4,89.4C461.7,103.9,470.7,122.5,474.9,143.5C475.8,148,476.4,152.6,477.3,158.1C443.8,159.9,410.7,161.7,378,163.4C376.4,157.1,374.8,151.2,373.2,145z"/><path fill="#FEFEFF" d="M1696,408C1687.5,408,1679.5,408,1670.9,408C1672.4,400.4,1673.8,393.2,1675.3,386C1683.1,349.9,1690.9,313.8,1698.5,277.7C1699,275.5,1698.1,272.8,1697.1,270.7C1676.4,228.1,1655.6,185.5,1634.8,143C1622.2,117.1,1609.5,91.2,1596.9,65.4C1596.5,64.5,1596.2,63.6,1595.7,62.3C1597.1,62.2,1598.2,62.1,1599.3,62.1C1633.8,62.1,1668.3,62.1,1702.8,62C1706.1,62,1707.7,62.9,1709,66.1C1725.2,105.5,1741.6,144.9,1757.9,184.4C1758.6,186,1759.4,187.7,1760.5,190.1C1766.1,182.2,1771.4,174.7,1776.6,167.2C1800.4,133.1,1824.1,99.1,1848,65.1C1849.1,63.6,1851.4,62.2,1853.1,62.2C1892.3,62,1931.4,62.1,1970.6,62.1C1970.9,62.1,1971.2,62.2,1972.1,62.5C1968.3,67.5,1964.7,72.4,1961,77.1C1912.9,139.3,1864.7,201.5,1816.6,263.7C1815,265.8,1813.5,268.1,1811.6,270C1803.3,278.3,1803.4,289.6,1801.2,300C1793.5,334.6,1786.3,369.2,1779.2,403.9C1778.5,407.5,1777.1,408.1,1774,408.1C1748.2,408,1722.3,408,1696,408z"/><path fill="#FFF" d="M829.5,62.1C840.2,62.1,849.8,62.1,859.9,62.1C853.9,90.5,848,118.6,842,147C804.5,147,767.4,147,730,147C727.6,157.5,725.2,167.8,723,178.2C713.9,220.4,704.9,262.7,695.7,304.9C688.6,338,681.3,371.2,673.9,404.3C673.6,405.7,671.8,407.8,670.6,407.8C636,408,601.3,408,566.3,408C575.6,364.3,584.8,321,594.1,277.7C603.4,234.3,612.9,191,622.3,147.1C586.4,147.1,551,147.1,515.1,147.1C517.5,135.1,519.9,123.5,522.3,111.9C525.5,96.8,529,81.8,531.8,66.7C532.6,62.3,534.5,62,538.1,62C615.7,62.1,693.4,62.1,771,62.1C790.5,62.1,810,62.1,829.5,62.1z"/><path fill="#0161AD" d="M1402,202.9C1392.1,202.9,1382.6,202.9,1372.7,202.9C1377.8,179,1382.8,155.6,1387.9,131.5C1413.1,132,1438.2,131.3,1463,133.4C1493.9,136.1,1493.4,165.6,1481.9,181.6C1473.4,193.2,1461.3,199.5,1447.3,200.8C1432.4,202.2,1417.4,202.2,1402,202.9z"/><path fill="#0161AD" d="M978.4,329.8C956.3,318.5,946.6,299.5,946.8,276.3C947.1,237.3,956.5,200.4,979.2,167.9C993.9,146.9,1014,134.8,1040.5,135C1071,135.2,1093.8,155.3,1098.1,185.5C1101.2,207.1,1096.6,227.8,1091,248.3C1084.6,271.5,1075.1,293.2,1058.6,311.4C1038.2,334,1007.1,341.4,978.4,329.8z"/></svg>';
+// =====================================================================
+//  SHARED CONFIG — keep IDENTICAL in the Diagnostic and the Matching Tool.
+//  Lists are encoded by position, so only ever ADD items to the END of a
+//  list. Re-ordering or deleting items will break codes already issued.
+// =====================================================================
+const CODE_VERSION = 'SMC1';
+const ALPHABET = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ'; // 34 chars, no I or O
+
+const AREAS = [
+  { name: 'Technical & engineering know-how', eg: 'Methods, temporary works, standards, design or technical problem-solving' },
+  { name: 'Leading people & site teams', eg: 'Running a gang or team, briefings, managing subcontractors, getting the best from people' },
+  { name: 'Health, safety & environmental leadership', eg: 'Setting the standard on site, safety conversations, near-miss learning' },
+  { name: 'Commercial, cost & project controls', eg: 'Valuations, cost reporting, change, contracts, keeping a job on budget' },
+  { name: 'Planning & programme', eg: 'Possessions, look-aheads, sequencing, keeping a job on programme' },
+  { name: 'Qualifications & professional development', eg: 'Apprenticeships, chartership or professional reviews, CPD' },
+  { name: 'Career direction & progression', eg: 'Working out next steps, moving roles or divisions, building a career at Story' },
+  { name: 'Confidence, communication & influencing', eg: 'Speaking up, presenting, handling difficult conversations' },
+  { name: 'Client & stakeholder relationships', eg: 'Client meetings, building trust, managing expectations' },
+  { name: 'Stepping into a new role', eg: 'First-time manager or supervisor, a bigger remit, a new team' },
+  { name: 'Wellbeing, resilience & balance', eg: 'Managing pressure, workload, time away from home, staying well' }
+];
+
+const LEVELS = [
+  'Early career (apprentice, trainee, graduate)',
+  'Experienced (operative, craft, technical, admin)',
+  'Supervisory (supervisor, foreman, team leader)',
+  'Professional or manager (engineer, PM, manager)',
+  'Senior leader (senior manager, head of, director)'
+];
+
+const BUSINESS = ['Story Eastern', 'Story North West', 'Story Scotland', 'Story South and Central', 'Story Construction', 'Group Services'];
+
+const SETTINGS = ['Mostly on site', 'Mostly office-based', 'A mix of both'];
+
+const REGIONS = [
+  'Scotland', 'North West & Cumbria', 'North East', 'Yorkshire & the Humber',
+  'Midlands', 'Wales', 'South & London', 'I travel widely / multiple regions'
+];
+const REGION_ANY = 7; // index of the "travel widely" option
+
+const FREQUENCIES = ['Every couple of weeks', 'About once a month', 'Every 6 to 8 weeks'];
+
+const FORMATS = ['In person', 'On Teams']; // bitmask: 1 = in person, 2 = Teams
+
+const OFFERS = ['', 'Mentoring', 'Coaching', 'Mentoring and coaching'];      // bitmask 1|2
+const ROUTES = ['', 'Mentoring', 'Coaching', 'Open to either'];             // 1, 2, 3
+const AREA_PREFS = ['No preference', 'Someone from my part of the business', 'Someone from a different part of the business'];
+
+// Style dimensions. Each is encoded 0-8 (4 = balanced).
+const DIMS = [
+  { key: 'D', low: 'Guides', high: 'Draws out',
+    lowText: 'shares experience, gives advice and practical steps',
+    highText: 'asks questions and helps the other person find their own answers' },
+  { key: 'C', low: 'Supports', high: 'Challenges',
+    lowText: 'leads with encouragement and reassurance',
+    highText: 'is direct, holds people to account and stretches them' },
+  { key: 'S', low: 'Flexible', high: 'Structured',
+    lowText: 'lets conversations go where they need to',
+    highText: 'works to clear goals, plans and follow-ups' }
+];
+
+// ---------- Code encode / decode ----------
+// Layout (22 data chars + 2 checksum):
+//  0 role-specific A (supporter: offer 1-3 | seeker: route 1-3)
+//  1 role-specific B (supporter: capacity 1-3 | seeker: area pref 0-2)
+//  2-4 style D,C,S (0-8)
+//  5 level, 6 business, 7 setting, 8 region, 9 format mask, 10 frequency
+//  11-21 areas (supporter: experience 0-3 | seeker: priority rank 0-3, 1 = top)
+function checksum(vals) {
+  let s = 7;
+  vals.forEach((v, i) => { s = (s * 31 + (v + 1) * (i + 3)) % (34 * 34); });
+  return [Math.floor(s / 34), s % 34];
+}
+function encodeProfile(p) {
+  const vals = [p.a, p.b, ...p.style, p.level, p.biz, p.setting, p.region, p.fmt, p.freq, ...p.areas];
+  const ck = checksum(vals);
+  const body = vals.concat(ck).map(v => ALPHABET[v]).join('');
+  return CODE_VERSION + '-' + p.role + '-' + body.match(/.{1,4}/g).join('-');
+}
+function decodeProfile(raw) {
+  const m = String(raw).toUpperCase().match(/SMC1[\s-]*([ML])[\s-]*((?:[0-9A-HJ-NP-Z][\s-]*){24})/);
+  if (!m) return null;
+  const chars = m[2].replace(/[\s-]/g, '').split('');
+  const vals = chars.map(c => ALPHABET.indexOf(c));
+  if (vals.some(v => v < 0)) return null;
+  const data = vals.slice(0, 22), ck = checksum(data);
+  if (ck[0] !== vals[22] || ck[1] !== vals[23]) return { error: 'checksum' };
+  const p = {
+    role: m[1], a: data[0], b: data[1], style: data.slice(2, 5),
+    level: data[5], biz: data[6], setting: data[7], region: data[8], fmt: data[9], freq: data[10],
+    areas: data.slice(11, 22)
+  };
+  const ok = p.a >= 1 && p.a <= 3 && p.style.every(v => v <= 8) && p.level < LEVELS.length &&
+    p.biz < BUSINESS.length && p.setting < SETTINGS.length && p.region < REGIONS.length &&
+    p.fmt >= 1 && p.fmt <= 3 && p.freq < FREQUENCIES.length && p.areas.every(v => v <= 3);
+  if (!ok) return { error: 'range' };
+  p.code = encodeProfile(p);
+  return p;
+}
+
+
+// =====================================================================
+//  SETTINGS FOR L&D — paste your MS Forms links here
+// =====================================================================
+const FORM_URL_SUPPORTER = 'https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=08YlTNooVkOCuotWYNWAxT7XR7FLtgxPoicW1QDCHulUMkIzSlFQVUZEOVNXRUJVOVBUWEtDVjFUTy4u'; // e.g. https://forms.office.com/... (form for mentors & coaches)
+const FORM_URL_SEEKER    = 'https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=08YlTNooVkOCuotWYNWAxT7XR7FLtgxPoicW1QDCHulUMkIzSlFQVUZEOVNXRUJVOVBUWEtDVjFUTy4u'; // e.g. https://forms.office.com/... (mentor / coach request form)
+
+// =====================================================================
+//  SCENARIOS
+//  Each option nudges the three style dimensions:
+//   D: negative = Guides (advice, experience)  | positive = Draws out (questions)
+//   C: negative = Supports (encourage)         | positive = Challenges (stretch)
+//   S: negative = Flexible                     | positive = Structured
+//  Supporters answer "what would you do?"; seekers answer "what would help you most?"
+// =====================================================================
+const SCENARIOS = [
+  {
+    title: 'The overrun',
+    M: 'You\'re supporting a newly promoted supervisor. They tell you a job overran last night and the possession was nearly lost. They\'re clearly rattled.',
+    L: 'Imagine you\'ve just stepped up to supervisor. A job overran last night and the possession was nearly lost. You\'re rattled and you meet your mentor or coach the next day.',
+    qM: 'What\'s your first move?', qL: 'What would help you most?',
+    options: [
+      { M: 'Talk them through how you\'d have planned it and the checks you\'d use next time', L: 'Hearing how they\'d have planned it and the checks they\'d use next time', v: { D: -2, S: 1 } },
+      { M: 'Ask what they think happened and what they\'d do differently', L: 'Being asked what I think happened and what I\'d do differently', v: { D: 2 } },
+      { M: 'Reassure them it happens to everyone; the plan can wait until they feel steadier', L: 'Some reassurance that it happens to everyone; the plan can wait until I feel steadier', v: { C: -2, D: 1, S: -1 } },
+      { M: 'Be clear about where it went wrong and ask them to bring a plan to your next session', L: 'Being told plainly where it went wrong, and being asked to bring a plan next time', v: { D: -1, C: 2, S: 1 } }
+    ]
+  },
+  {
+    title: 'The crossroads',
+    M: 'Your mentee is weighing up two options: working towards a professional qualification in their current role, or applying for a role in a different part of the business. They can\'t decide.',
+    L: 'You\'re weighing up two options: working towards a professional qualification in your current role, or applying for a role in a different part of the business. You can\'t decide.',
+    qM: 'How do you help?', qL: 'What would help you most?',
+    options: [
+      { M: 'Share your own career path and tell them what you\'d recommend', L: 'Hearing their own career path and what they\'d recommend', v: { D: -2 } },
+      { M: 'Ask questions to help them work out what matters most to them', L: 'Questions that help me work out what matters most to me', v: { D: 2, S: -1 } },
+      { M: 'Suggest a simple pros-and-cons exercise and agree a date to decide by', L: 'A simple pros-and-cons exercise and a date to decide by', v: { S: 2, C: 1 } },
+      { M: 'Gently ask whether they\'re avoiding the harder option, and why', L: 'Being asked whether I\'m avoiding the harder option, and why', v: { C: 2, D: 1 } }
+    ]
+  },
+  {
+    title: 'The off-track session',
+    M: 'Twenty minutes into a session, your mentee is still venting about a difficult relationship with their line manager. You had agreed to work on something else today.',
+    L: 'You turn up to a session frustrated about a difficult relationship with your line manager. You\'d agreed to work on something else today.',
+    qM: 'What do you do?', qL: 'What would you want from them?',
+    options: [
+      { M: 'Let them talk. Sometimes that\'s what\'s needed', L: 'Space to talk it through, even if we don\'t get to the plan', v: { C: -2, S: -2, D: 1 } },
+      { M: 'Listen for a while, then steer back to the goals you agreed', L: 'Listen for a while, then steer us back to the goals we agreed', v: { S: 2 } },
+      { M: 'Ask what they could do about it that\'s within their control', L: 'Ask me what I could do about it that\'s within my control', v: { D: 2, C: 1 } },
+      { M: 'Tell them how you\'d handle that manager', L: 'Tell me how they\'d handle that manager', v: { D: -2 } }
+    ]
+  },
+  {
+    title: 'The missed actions',
+    M: 'For the second time running, your mentee hasn\'t done the actions you agreed. Work on site has been flat out.',
+    L: 'For the second time running, you haven\'t managed the actions you agreed. Work has been flat out.',
+    qM: 'How do you handle it?', qL: 'How would you want them to handle it?',
+    options: [
+      { M: 'Name it directly and ask what\'s really getting in the way', L: 'Name it directly and ask what\'s really getting in the way', v: { C: 2, D: 1 } },
+      { M: 'Let it go. Things are busy, so agree something smaller instead', L: 'Let it go and agree something smaller; they know it\'s busy', v: { C: -2, S: -1 } },
+      { M: 'Rework the plan together with dates and a quick mid-point check-in', L: 'Rework the plan with me, with dates and a quick mid-point check-in', v: { S: 2 } },
+      { M: 'Share how you\'ve managed your own workload when it\'s been like this', L: 'Share how they\'ve managed their own workload when it\'s been like this', v: { D: -2, C: -1 } }
+    ]
+  },
+  {
+    title: 'The first session',
+    M: 'You\'re about to have your first session with someone you\'ve just been matched with.',
+    L: 'You\'re about to have your first session with your new mentor or coach.',
+    qM: 'How do you like to start?', qL: 'How would you like it to start?',
+    options: [
+      { M: 'Agree goals, how often you\'ll meet and some ground rules, and write them down', L: 'Agreeing goals, how often we\'ll meet and some ground rules, written down', v: { S: 2 } },
+      { M: 'Get to know each other and let the agenda form naturally', L: 'Getting to know each other and letting the agenda form naturally', v: { S: -2, C: -1 } },
+      { M: 'Ask them to bring whatever they want to work on each time', L: 'Bringing whatever I want to work on each time', v: { D: 2, S: -1 } },
+      { M: 'Set out the topics you think they\'ll need to cover', L: 'Them setting out the topics they think I\'ll need to cover', v: { D: -2, S: 1 } }
+    ]
+  },
+  {
+    title: 'The client meeting',
+    M: 'Your mentee has to present progress at a client meeting for the first time. They\'re nervous and it\'s next week.',
+    L: 'You\'ve got to present progress at a client meeting for the first time. You\'re nervous and it\'s next week.',
+    qM: 'What do you offer?', qL: 'What would help you most?',
+    options: [
+      { M: 'Run a practice with them and give honest feedback', L: 'A practice run with honest feedback', v: { C: 2, D: -1, S: 1 } },
+      { M: 'Share the tips and tricks that have worked for you', L: 'Their tips and tricks that have worked for them', v: { D: -2, C: -1 } },
+      { M: 'Explore what\'s behind the nerves and what a good outcome looks like', L: 'Exploring what\'s behind my nerves and what a good outcome looks like', v: { D: 2 } },
+      { M: 'Encourage them and remind them of their strengths', L: 'Encouragement and a reminder of my strengths', v: { C: -2 } }
+    ]
+  },
+  {
+    title: 'The near miss',
+    M: 'There\'s been a near miss in your mentee\'s team. When it comes up, they\'re defensive and blame the subcontractor.',
+    L: 'There\'s been a near miss in your team. You feel defensive and think the subcontractor is mostly to blame.',
+    qM: 'How do you respond?', qL: 'What would help you most?',
+    options: [
+      { M: 'Be clear about the standard expected and ask them to own their part', L: 'Being clear about the standard expected and asking me to own my part', v: { C: 2, D: -1 } },
+      { M: 'Ask open questions to help them see it from other people\'s point of view', L: 'Open questions that help me see it from other people\'s point of view', v: { D: 2, C: 1 } },
+      { M: 'Acknowledge the pressure they were under before anything else', L: 'Someone acknowledging the pressure I was under before anything else', v: { C: -2, S: -1 } },
+      { M: 'Walk them through a simple review step by step', L: 'Being walked through a simple review step by step', v: { S: 2, D: -1 } }
+    ]
+  }
+];
+
+// Normalise raw scenario totals to 0-8 using the min / max possible per dimension
+const DIM_RANGE = {};
+DIMS.forEach(d => {
+  let lo = 0, hi = 0;
+  SCENARIOS.forEach(s => {
+    const vals = s.options.map(o => o.v[d.key] || 0);
+    lo += Math.min(...vals); hi += Math.max(...vals);
+  });
+  DIM_RANGE[d.key] = [lo, hi];
+});
+
+// =====================================================================
+//  STATE
+// =====================================================================
+let S;
+function fresh() {
+  return { path: null, step: 0, level: null, biz: null, setting: null, region: null,
+    sc: SCENARIOS.map(() => null), exp: AREAS.map(() => null), offer: null, capacity: null,
+    focus: [], canDo: null, conf: null, pref: null, fmt: 0, freq: null, areaPref: null, routeOverride: null };
+}
+S = fresh();
+
+function steps() {
+  const list = ['path', 'about'];
+  SCENARIOS.forEach((_, i) => list.push('sc' + i));
+  if (S.path === 'M') list.push('experience', 'offer');
+  if (S.path === 'L') list.push('focus', 'route');
+  list.push('practical', 'result');
+  return list;
+}
+
+// =====================================================================
+//  HELPERS
+// =====================================================================
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+function opt(label, pressed, onclick, kind, extra) {
+  const marker = kind === 'check' ? '<span class="check">' + (pressed ? '&#10003;' : '') + '</span>'
+    : kind === 'rank' ? '<span class="rank">' + (extra || '') + '</span>' : '<span class="dot"></span>';
+  return '<button class="opt" aria-pressed="' + !!pressed + '" onclick="' + onclick + '">' + marker + '<span>' + label + '</span></button>';
+}
+function radios(field, list, cls) {
+  return '<div class="opts ' + (cls || '') + '" role="group">' +
+    list.map((l, i) => opt(esc(l), S[field] === i, "setField('" + field + "'," + i + ")")).join('') + '</div>';
+}
+function setField(f, v) { S[f] = v; render(); }
+function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2200); }
+
+function styleScores() {
+  const raw = { D: 0, C: 0, S: 0 };
+  S.sc.forEach((a, i) => { if (a === null) return; const v = SCENARIOS[i].options[a].v; for (const k in v) raw[k] += v[k]; });
+  return DIMS.map(d => { const [lo, hi] = DIM_RANGE[d.key]; return Math.round((raw[d.key] - lo) / (hi - lo) * 8); });
+}
+function routeSuggestion() {
+  // Mirrors the "Mentor or Coach?" toolkit: low Can Do -> mentoring; capable but needs
+  // to unlock confidence or performance -> coaching. Stated preference counts too.
+  let score = 0; // positive = coaching
+  if (S.canDo !== null) score += S.canDo <= 1 ? -2 : 2;
+  if (S.canDo >= 2 && S.conf !== null && S.conf <= 1) score += 1;
+  if (S.pref === 0) score -= 2; if (S.pref === 1) score += 2;
+  const D = styleScores()[0];
+  if (D <= 2) score -= 1; if (D >= 6) score += 1;
+  return score >= 2 ? 2 : score <= -2 ? 1 : 3;
+}
+function currentRoute() { return S.routeOverride || routeSuggestion(); }
+
+function buildProfile() {
+  const areas = S.path === 'M' ? S.exp.map(v => v || 0) : AREAS.map((_, i) => { const r = S.focus.indexOf(i); return r < 0 ? 0 : r + 1; });
+  return {
+    role: S.path,
+    a: S.path === 'M' ? S.offer : currentRoute(),
+    b: S.path === 'M' ? S.capacity : S.areaPref,
+    style: styleScores(), level: S.level, biz: S.biz, setting: S.setting, region: S.region,
+    fmt: S.fmt, freq: S.freq, areas
+  };
+}
+
+// =====================================================================
+//  VALIDATION PER STEP
+// =====================================================================
+function stepValid(id) {
+  if (id === 'about') return S.level !== null && S.biz !== null && S.setting !== null && S.region !== null;
+  if (id.startsWith('sc')) return S.sc[+id.slice(2)] !== null;
+  if (id === 'experience') return S.exp.every(v => v !== null);
+  if (id === 'offer') return S.offer !== null && S.capacity !== null;
+  if (id === 'focus') return S.focus.length >= 1;
+  if (id === 'route') return S.canDo !== null && S.conf !== null && S.pref !== null;
+  if (id === 'practical') return S.fmt > 0 && S.freq !== null && (S.path === 'M' || S.areaPref !== null);
+  return true;
+}
+
+function go(delta) {
+  const list = steps();
+  const id = list[S.step];
+  if (delta > 0 && !stepValid(id)) return;
+  S.step = Math.max(0, Math.min(list.length - 1, S.step + delta));
+  render(); window.scrollTo({ top: 0, behavior: 'smooth' });
+  const h = document.querySelector('#app h1, #app .q-text'); if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); }
+}
+function choosePath(p) { S.path = p; S.step = 1; render(); window.scrollTo({ top: 0 }); }
+function restart() { S = fresh(); render(); window.scrollTo({ top: 0 }); }
+
+function progress(id) {
+  const list = steps();
+  const total = list.length - 2, n = Math.min(S.step, total);
+  return '<div class="progress-wrap no-print"><div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="' + total + '" aria-valuenow="' + n + '"><div class="progress-fill" style="width:' + (n / total * 100) + '%"></div></div><div class="progress-text">Step ' + n + ' of ' + total + '</div></div>';
+}
+function nav(id, label) {
+  const ok = stepValid(id);
+  return '<div class="nav"><button class="nav-btn" onclick="go(-1)">&larr; Back</button>' +
+    (ok ? '' : '<span class="nav-note">Answer to continue</span>') +
+    '<button class="nav-btn primary" onclick="go(1)" ' + (ok ? '' : 'disabled') + '>' + (label || 'Next') + ' &rarr;</button></div>';
+}
+
+// =====================================================================
+//  RENDER
+// =====================================================================
+const ICON_GIVE = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
+const ICON_SEEK = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>';
+
+function render() {
+  const app = document.getElementById('app');
+  document.getElementById('restart-btn').style.display = S.path ? '' : 'none';
+  const id = steps()[S.step];
+  const M = S.path === 'M';
+  let h = '';
+
+  if (id === 'path') {
+    h = '<div class="title-block"><h1 class="title">Find Your Match</h1><p class="subtitle">A short set of real-world scenarios that helps us pair people with the mentor or coach who suits them best. It takes about 10 minutes and there are no right or wrong answers.</p></div>' +
+      '<div class="path-grid">' +
+      '<button class="path-card" onclick="choosePath(\'M\')"><div class="path-icon" style="background:#0061AD">' + ICON_GIVE + '</div><h2>I\'d like to be a mentor or coach</h2><p>Tell us about your experience and how you naturally support people, so we can match you with someone you\'ll really help.</p></button>' +
+      '<button class="path-card" onclick="choosePath(\'L\')"><div class="path-icon" style="background:#009FA0">' + ICON_SEEK + '</div><h2>I\'d like a mentor or coach</h2><p>Tell us what you want to work on and what kind of support helps you, so we can find the right person for you.</p></button>' +
+      '</div>' +
+      '<div class="how"><h3>How it works</h3><ol><li>Work through the scenarios and questions.</li><li>You\'ll get a short profile and a <strong>match code</strong> at the end.</li><li>Copy the code into the Mentoring &amp; Coaching form. L&amp;D use it to suggest your best-fit matches.</li></ol><p style="margin-top:8px">Your code only holds your answers. It contains no names or personal details. Please complete the <em>Mentor or Coach?</em> toolkit first if you haven\'t already.</p></div>';
+  }
+
+  else if (id === 'about') {
+    h = progress(id) + '<div class="card"><div class="q-section">About you</div><h2 class="q-text">A little about your role</h2><p class="q-hint">This helps with practical things like experience level and location. ' + (M ? '' : 'You\'ll get to say what you\'d like from a match later.') + '</p>' +
+      '<div class="field-label">Which best describes your level?</div>' + radios('level', LEVELS) +
+      '<div class="field-label">Which part of the business are you in?</div>' + radios('biz', BUSINESS, 'grid') +
+      '<div class="field-label">Where do you mostly work?</div>' + radios('setting', SETTINGS, 'grid') +
+      '<div class="field-label">Which region are you based in?</div>' + radios('region', REGIONS, 'grid') +
+      nav(id) + '</div>';
+  }
+
+  else if (id.startsWith('sc')) {
+    const i = +id.slice(2), sc = SCENARIOS[i];
+    h = progress(id) + '<div class="card"><div class="q-section">Scenario ' + (i + 1) + ' of ' + SCENARIOS.length + ' &middot; ' + esc(sc.title) + '</div>' +
+      '<div class="scenario">' + esc(sc[S.path]) + '</div>' +
+      '<h2 class="q-text">' + esc(M ? sc.qM : sc.qL) + '</h2>' +
+      '<p class="q-hint">' + (M ? 'Pick the one closest to what you\'d naturally do, not what you think you should do.' : 'Pick the one that would genuinely help you most.') + '</p>' +
+      '<div class="opts">' + sc.options.map((o, j) => opt(esc(o[S.path]), S.sc[i] === j, 'pickSc(' + i + ',' + j + ')')).join('') + '</div>' +
+      nav(id) + '</div>';
+  }
+
+  else if (id === 'experience') {
+    const lv = ['None yet', 'Some', 'A lot', 'Specialist'];
+    h = progress(id) + '<div class="card"><div class="q-section">Your experience</div><h2 class="q-text">Where could you help someone?</h2><p class="q-hint">For each area, how much experience could you draw on? Be honest. A match works best where you\'ve genuinely been there.</p>' +
+      AREAS.map((a, i) => '<div class="exp-row"><div><div class="exp-name">' + esc(a.name) + '</div><div class="exp-eg">' + esc(a.eg) + '</div></div><div class="seg" role="group" aria-label="' + esc(a.name) + '">' +
+        lv.map((l, j) => '<button aria-pressed="' + (S.exp[i] === j) + '" onclick="setExp(' + i + ',' + j + ')">' + l + '</button>').join('') + '</div></div>').join('') +
+      nav(id) + '</div>';
+  }
+
+  else if (id === 'offer') {
+    h = progress(id) + '<div class="card"><div class="q-section">What you can offer</div><h2 class="q-text">How would you like to support people?</h2>' +
+      '<p class="q-hint"><strong>Mentoring</strong> means sharing your knowledge and experience with someone who\'s on a path you\'ve walked. <strong>Coaching</strong> means helping someone who already has the know-how to unlock their own answers, mostly by asking rather than telling.</p>' +
+      '<div class="opts">' + [1, 2, 3].map(v => opt(OFFERS[v], S.offer === v, 'setField(\'offer\',' + v + ')')).join('') + '</div>' +
+      '<div class="field-label">How many people could you support at once?</div>' +
+      '<div class="opts grid">' + [1, 2, 3].map(v => opt(v === 3 ? '3 or more' : String(v), S.capacity === v, 'setField(\'capacity\',' + v + ')')).join('') + '</div>' +
+      nav(id) + '</div>';
+  }
+
+  else if (id === 'focus') {
+    h = progress(id) + '<div class="card"><div class="q-section">What you want to work on</div><h2 class="q-text">Pick up to three areas, in order of priority</h2><p class="q-hint">Tap your most important area first. Tap again to remove it.</p>' +
+      '<div class="opts">' + AREAS.map((a, i) => { const r = S.focus.indexOf(i); return opt(esc(a.name) + '<small>' + esc(a.eg) + '</small>', r >= 0, 'toggleFocus(' + i + ')', 'rank', r >= 0 ? r + 1 : ''); }).join('') + '</div>' +
+      nav(id) + '</div>';
+  }
+
+  else if (id === 'route') {
+    const top = AREAS[S.focus[0]].name;
+    h = progress(id) + '<div class="card"><div class="q-section">Mentor or coach?</div><h2 class="q-text">Thinking about your top priority: ' + esc(top) + '</h2><p class="q-hint">These help us work out whether a mentor or a coach will suit you best.</p>' +
+      '<div class="field-label">How much do you already know about it, or have you done it before?</div>' +
+      radios('canDo', ['It\'s new to me', 'I know a bit but haven\'t done much', 'I can do it, but want to do it better', 'I know it well; something else is holding me back']) +
+      '<div class="field-label">How confident do you feel about it right now?</div>' +
+      radios('conf', ['Not confident', 'A bit unsure', 'Fairly confident', 'Very confident'], 'grid') +
+      '<div class="field-label">Which sounds more like what you\'re after?</div>' +
+      radios('pref', ['Someone who\'s been where I want to go and can share what they\'ve learned', 'Someone to help me think things through and find my own answers', 'A bit of both, or I\'m not sure']) +
+      nav(id) + '</div>';
+  }
+
+  else if (id === 'practical') {
+    h = progress(id) + '<div class="card"><div class="q-section">Practicalities</div><h2 class="q-text">How would meeting up work for you?</h2>' +
+      '<div class="field-label">How could you meet? (choose any)</div>' +
+      '<div class="opts grid">' + FORMATS.map((f, i) => opt(f, S.fmt & (1 << i), 'toggleFmt(' + i + ')', 'check')).join('') + '</div>' +
+      '<div class="field-label">' + (M ? 'How often could you realistically meet?' : 'How often would you like to meet?') + '</div>' + radios('freq', FREQUENCIES) +
+      (M ? '' : '<div class="field-label">Would you prefer someone from a particular part of the business?</div>' + radios('areaPref', AREA_PREFS)) +
+      nav(id, 'See my profile') + '</div>';
+  }
+
+  else if (id === 'result') h = renderResult();
+
+  app.innerHTML = h;
+  app.classList.toggle('still', lastRendered === id);
+  lastRendered = id;
+}
+let lastRendered = null;
+
+function pickSc(i, j) { S.sc[i] = j; render(); setTimeout(() => go(1), 260); }
+function setExp(i, j) { S.exp[i] = j; render(); }
+function toggleFocus(i) {
+  const r = S.focus.indexOf(i);
+  if (r >= 0) S.focus.splice(r, 1);
+  else if (S.focus.length < 3) S.focus.push(i);
+  else toast('You can choose up to three. Tap one to remove it.');
+  render();
+}
+function toggleFmt(i) { S.fmt ^= (1 << i); render(); }
+function setRoute(v) { S.routeOverride = v; render(); }
+
+function spectrum(d, v, M) {
+  const pct = 4 + v / 8 * 92;
+  const side = v <= 2 ? d.lowText : v >= 6 ? d.highText : null;
+  const who = M ? 'You lean towards an approach that ' : 'You\'re likely to get most from someone who ';
+  const desc = side ? who + side + '.' : (M ? 'You balance both, depending on the situation.' : 'A balance of both suits you.');
+  return '<div class="spectrum"><div class="spec-labels"><span>' + d.low + '</span><span>' + d.high + '</span></div>' +
+    '<div class="spec-track" role="img" aria-label="' + d.low + ' to ' + d.high + ': ' + v + ' of 8"><div class="spec-marker" style="left:' + pct + '%"></div></div>' +
+    '<div class="spec-desc">' + desc + '</div></div>';
+}
+
+function renderResult() {
+  const M = S.path === 'M';
+  const p = buildProfile();
+  const code = encodeProfile(p);
+  const st = p.style;
+  let h = '';
+
+  if (M) {
+    const strengths = AREAS.map((a, i) => ({ a, v: S.exp[i] })).filter(x => x.v >= 2).sort((x, y) => y.v - x.v);
+    h += '<div class="res-hero"><div class="eyebrow">Your supporter profile</div><h2>You\'re offering ' + OFFERS[S.offer].toLowerCase() + '</h2><p>Here\'s a snapshot of the experience you bring and your natural approach. We\'ll use it to match you with people who\'ll get the most from you.</p></div>';
+    h += '<div class="res-card"><h3>Where you can help most</h3>' + (strengths.length
+      ? '<div class="chips">' + strengths.map(x => '<span class="chip' + (x.v === 3 ? '' : ' teal') + '">' + esc(x.a.name) + (x.v === 3 ? ' &middot; specialist' : '') + '</span>').join('') + '</div>'
+      : '<p>You didn\'t mark any areas as "a lot" or "specialist". That\'s fine. You may be well suited to coaching, where your questions matter more than your experience.</p>') + '</div>';
+    h += '<div class="res-card"><h3>Your natural approach</h3><p>Based on what you said you\'d do in the scenarios.</p>' + DIMS.map((d, i) => spectrum(d, st[i], true)).join('');
+    if ((S.offer & 2) && st[0] <= 2) h += '<div class="note"><strong>Worth knowing:</strong> your answers lean towards giving advice. Coaching works best when you hold back and ask more than you tell. The <em>Mentor or Coach?</em> toolkit has some useful pointers.</div>';
+    h += '</div>';
+  } else {
+    const route = currentRoute(), sugg = routeSuggestion();
+    const routeText = { 1: 'A mentor looks like a great fit', 2: 'A coach looks like a great fit', 3: 'You\'d do well with a mentor or a coach' }[route];
+    const routeWhy = { 1: 'You\'re building knowledge and experience in your priority area, so someone who\'s been there and can share what they\'ve learned should help most.', 2: 'You already have a good grounding in your priority area, so someone who helps you unlock your own thinking and confidence should help most.', 3: 'Your answers point both ways, so we\'ll look across both mentors and coaches for your best fit.' }[route];
+    h += '<div class="res-hero" style="background:linear-gradient(135deg,#009FA0,#0061AD)"><div class="eyebrow">Your match profile</div><h2>' + routeText + '</h2><p>' + routeWhy + '</p></div>';
+    h += '<div class="res-card no-print"><h3>Does that feel right?</h3><p>You can change this if you know what you\'d prefer.' + (S.routeOverride && S.routeOverride !== sugg ? ' Our suggestion was <strong>' + ROUTES[sugg].toLowerCase() + '</strong>.' : '') + '</p><div class="route-switch">' +
+      [1, 2, 3].map(v => '<button class="pill-btn' + (route === v ? ' active' : '') + '" aria-pressed="' + (route === v) + '" onclick="setRoute(' + v + ')">' + ROUTES[v] + '</button>').join('') + '</div></div>';
+    h += '<div class="res-card"><h3>What you want to work on</h3><div class="chips">' + S.focus.map((i, r) => '<span class="chip">' + (r + 1) + '. ' + esc(AREAS[i].name) + '</span>').join('') + '</div></div>';
+    h += '<div class="res-card"><h3>The support that suits you</h3><p>Based on what you said would help you most in the scenarios.</p>' + DIMS.map((d, i) => spectrum(d, st[i], false)).join('') + '</div>';
+  }
+
+  const url = M ? FORM_URL_SUPPORTER : FORM_URL_SEEKER;
+  h += '<div class="res-card"><h3>Your match code</h3><p>Copy this code and paste it into the Mentoring &amp; Coaching form. It only holds your answers above, with no names or personal details.</p>' +
+    '<div class="code-box"><span class="code" id="code">' + code + '</span><button class="nav-btn primary no-print" onclick="copyCode()">Copy code</button></div>' +
+    '<ol class="steps" style="margin:16px 0 0 20px"><li>Copy your code.</li><li>' + (url ? '<a href="' + esc(url) + '" target="_blank" rel="noopener">Open the form</a>' : 'Open the Mentoring &amp; Coaching form') + ' and paste it into the "match code" question.</li><li>L&amp;D will review suggested matches and be in touch.</li></ol>' +
+    '<div class="nav no-print"><button class="nav-btn" onclick="go(-1)">&larr; Change answers</button><button class="nav-btn" onclick="window.print()">Save as PDF</button>' +
+    (url ? '<a class="nav-btn primary" href="' + esc(url) + '" target="_blank" rel="noopener" onclick="copyCode()">Copy &amp; open form &rarr;</a>' : '') + '</div></div>';
+  return h;
+}
+
+function copyCode() {
+  const code = document.getElementById('code').textContent;
+  const done = () => toast('Code copied');
+  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(code).then(done, fallback); else fallback();
+  function fallback() {
+    const ta = document.createElement('textarea'); ta.value = code; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); done(); } catch (e) { toast('Select the code and copy it manually'); }
+    ta.remove();
+  }
+}
+
+let largeText = false;
+try { largeText = localStorage.getItem('mc-text') === 'lg'; } catch (e) {}
+function applyText() {
+  document.body.classList.toggle('text-lg', largeText);
+  const b = document.getElementById('text-btn'); b.setAttribute('aria-pressed', largeText); b.classList.toggle('active', largeText);
+  b.textContent = largeText ? 'Reset text' : 'Larger text';
+}
+function toggleText() { largeText = !largeText; try { localStorage.setItem('mc-text', largeText ? 'lg' : 'normal'); } catch (e) {} applyText(); }
+
+document.getElementById('logo').innerHTML = STORY_LOGO_SVG;
+applyText();
+render();
+</script>
+</body>
+</html>
